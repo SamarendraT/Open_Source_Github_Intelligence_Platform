@@ -7,17 +7,25 @@ Phase-by-phase log. Full plan: `DE_Project_Plan_GitHub_Ecosystem_Intelligence.md
 - [x] Repo skeleton (`infra/ bundle/ src/ notebooks/ tests/ docs/ .github/workflows/`)
 - [x] `.gitignore` + secrets policy decided (Key Vault + secret scopes; `.env` local only, never committed)
 - [ ] `git init` + first commit
-- [ ] GitHub repo created + pushed
-- [ ] Databricks Free Edition account created
-- [ ] Azure resource group created
-- [ ] Azure Cost Management budget = $80 with alerts at 50/75/90%
+- [x] GitHub repo created + pushed
+- [ ] Databricks Free Edition account created  ← **primary build/demo env** (see ADR-001)
+- [x] Azure Cost Management budget = **$50** (annual) with alerts at 50/75/90% (alert-only; credit is the real hard stop)
+
+> **Student-account constraints verified 2026-07-03 — see `docs/DECISIONS.md` ADR-001 & ADR-002.**
+> Region-lock policy, 4–6 vCPU cap, no Spot, optional SP. **Build-once portfolio artifact,
+> ≤ $50.** Strategy: hybrid — Free Edition for heavy build/backfill, Azure Databricks for
+> cloud-proof evidence. Orchestration is built & proven once, then the schedule is paused.
 
 ## Phase 1 — Provision Infrastructure (Terraform)
-- [ ] Terraform: RG, ADLS Gen2 (containers: raw/bronze/silver/gold), Databricks workspace (Premium), Key Vault, service principal + role assignment
-- [ ] `terraform apply` → `destroy` → re-`apply` (prove reproducibility)
+- [x] Terraform written (RG, ADLS Gen2 raw/bronze/silver/gold, Databricks workspace Premium, access connector, Key Vault, optional SP) — `infra/`
+- [x] **Install Terraform + Azure CLI** (`winget install Hashicorp.Terraform Microsoft.AzureCLI`)
+- [x] **Pre-flight** (`infra/README.md`) — results 2026-07-03: allowed regions = `centralindia, koreacentral, malaysiawest, austriaeast, eastasia` → **centralindia** chosen; SP creation **allowed** (personal tenant) → `create_service_principal = true`; `terraform.tfvars` filled
+- [x] vCPU quota check — all 5 allowed regions identical: Total Regional 6, DSv2/DSv3/FSv2/DASv4 = 4 each → `Standard_DS3_v2` single-node fits in centralindia
+- [x] `terraform init` / `validate` / `plan` / `apply` — **Apply complete 2026-07-03: 19 added, 0 errors.** Workspace `https://adb-7405610850603620.0.azuredatabricks.net`, storage `stghintelts02`, KV `kv-ghintel-ts02`, connector `dbac-ghintel`
+- [ ] (optional, anytime before Phase 8) `terraform destroy` → re-`apply` to prove reproducibility
 - [ ] Key Vault–backed secret scope in Databricks
-- [ ] Single-node, auto-terminating, spot cluster config
-- [ ] Unity Catalog: catalog + bronze/silver/gold schemas
+- [ ] Single-node, auto-terminating cluster config (`Standard_DS3_v2`, num_workers=0; NO spot — student subs can't, driver is on-demand anyway)
+- [ ] Unity Catalog: catalog + bronze/silver/gold schemas (storage credential ← access connector)
 
 ## Phase 2 — Ingestion → Bronze
 - [ ] GH Archive downloader (parameterized date range, re-runnable, skips landed files)

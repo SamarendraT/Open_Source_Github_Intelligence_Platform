@@ -1,6 +1,6 @@
 # GitHub Ecosystem Intelligence
 
-> An end-to-end lakehouse on **Azure + Databricks** built on the public GitHub event firehose ([GH Archive](https://www.gharchive.org/)) — ingesting millions of events per day into a Bronze → Silver → Gold Delta Lake architecture that answers real business questions about the open-source ecosystem.
+> An end-to-end lakehouse on **Azure + Databricks** built on the public GitHub event firehose ([GH Archive](https://www.gharchive.org/)) — ingesting millions of events per day into a Bronze → Silver → Gold Delta Lake architecture that answers real business questions about the open-source ecosystem. Developed for **~$0** on Databricks Free Edition and demonstrated on Azure for **under $50**.
 
 ---
 
@@ -85,7 +85,7 @@ GH Archive (hourly .json.gz)
 
 ## Cost Story
 
-Built for **~$0** (developed on Databricks Free Edition), demonstrated on Azure for **under $80**: Jobs Compute over All-Purpose (~3–4x cheaper per DBU), single-node spot VMs, 10-minute auto-terminate, resource tagging, and an Azure Cost Management budget with alerts at 50/75/90%. Full cost report in [docs/](docs/).
+Built for **~$0** (developed on Databricks Free Edition) and demonstrated on Azure for **under $50**: heavy build and historical backfill on free serverless, Azure limited to a few bounded runs on a single-node cluster, 10-minute auto-terminate, resource tagging, and an Azure Cost Management budget with alerts at 50/75/90%. A build-once portfolio artifact — the scheduled pipeline is built and proven, then paused. Full cost report and the student-account constraints I engineered around are in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Status
 

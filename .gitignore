@@ -12,6 +12,11 @@
 .terraform/
 *.tfstate
 *.tfstate.*
+*.tfplan
+tfplan*
+*.tfvars.json
+*_override.tf
+*_override.tf.json
 crash.log
 override.tf
 override.tf.json
