@@ -18,7 +18,7 @@ resource "azurerm_storage_account" "adls" {
 
 # One block, four medallion containers. DRY applies to infrastructure too.
 resource "azurerm_storage_container" "layers" {
-  for_each              = toset(["raw", "bronze", "silver", "gold"])
+  for_each              = toset(["raw", "bronze", "silver", "gold", "catalog"])
   name                  = each.key
   storage_account_id    = azurerm_storage_account.adls.id
   container_access_type = "private"

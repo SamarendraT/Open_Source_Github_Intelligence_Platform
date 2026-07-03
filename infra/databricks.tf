@@ -28,3 +28,23 @@ resource "azurerm_role_assignment" "uc_storage" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azurerm_databricks_access_connector.uc.identity[0].principal_id
 }
+
+resource "azurerm_role_assignment" "uc_storage_file_events" {
+  for_each = toset([
+    "Storage Queue Data Contributor",
+    "Storage Account Contributor",
+    "EventGrid EventSubscription Contributor",
+  ])
+  scope                = azurerm_storage_account.adls.id
+  role_definition_name = each.key
+  principal_id         = azurerm_databricks_access_connector.uc.identity[0].principal_id
+}
+
+
+# Owner grants control-plane only; browsing data in the portal / az CLI
+# needs an explicit data-plane role for the human operator too.
+resource "azurerm_role_assignment" "me_storage" {
+  scope                = azurerm_storage_account.adls.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
+}

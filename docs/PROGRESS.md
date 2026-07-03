@@ -23,9 +23,12 @@ Phase-by-phase log. Full plan: `DE_Project_Plan_GitHub_Ecosystem_Intelligence.md
 - [x] vCPU quota check — all 5 allowed regions identical: Total Regional 6, DSv2/DSv3/FSv2/DASv4 = 4 each → `Standard_DS3_v2` single-node fits in centralindia
 - [x] `terraform init` / `validate` / `plan` / `apply` — **Apply complete 2026-07-03: 19 added, 0 errors.** Workspace `https://adb-7405610850603620.0.azuredatabricks.net`, storage `stghintelts02`, KV `kv-ghintel-ts02`, connector `dbac-ghintel`
 - [ ] (optional, anytime before Phase 8) `terraform destroy` → re-`apply` to prove reproducibility
-- [ ] Key Vault–backed secret scope in Databricks
-- [ ] Single-node, auto-terminating cluster config (`Standard_DS3_v2`, num_workers=0; NO spot — student subs can't, driver is on-demand anyway)
-- [ ] Unity Catalog: catalog + bronze/silver/gold schemas (storage credential ← access connector)
+- [x] Key Vault–backed secret scope `gh-intel` (verified: `dbutils.secrets.list` → 3 secrets)
+- [x] Single-node, auto-terminating (10 min) cluster — node type **`Standard_E4as_v4`** (32 GB), NOT DS3_v2: hidden student-sub SKU restrictions block D4ds_v4/D4s_v3 (`NotAvailableForSubscription`) and centralindia doesn't offer DS3_v2/F4s_v2 at all; E4as_v4 + D4as_v4 were the only startable 4-core options (D4as_v4 absent from Databricks dropdown)
+- [x] Unity Catalog: storage credential `cred-ghintel` (access connector MI) → 5 external locations (raw/bronze/silver/gold/catalog, all tested) → catalog `ghintel` + `bronze/silver/gold` schemas pinned to their containers
+- [x] File-events roles added for Auto Loader notifications (queue/EventGrid/account contributor on the connector MI) + `Microsoft.EventGrid` provider registered
+- [x] **End-to-end smoke test passed 2026-07-03**: secret scope + `CREATE/SELECT/DROP ghintel.bronze._smoke` through the full chain
+- [x] Operator data-plane access (`me_storage` role) for portal browsing — Owner alone has no data rights (by design)
 
 ## Phase 2 — Ingestion → Bronze
 - [ ] GH Archive downloader (parameterized date range, re-runnable, skips landed files)
