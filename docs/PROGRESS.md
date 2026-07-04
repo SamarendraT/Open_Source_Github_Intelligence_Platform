@@ -31,8 +31,17 @@ Phase-by-phase log. Full plan: `DE_Project_Plan_GitHub_Ecosystem_Intelligence.md
 - [x] Operator data-plane access (`me_storage` role) for portal browsing — Owner alone has no data rights (by design)
 
 ## Phase 2 — Ingestion → Bronze
-- [ ] GH Archive downloader (parameterized date range, re-runnable, skips landed files)
-- [ ] Auto Loader raw → bronze (schema evolution, checkpointing, ingest metadata, partitioned)
+
+> **Constraint found 2026-07-03:** Free Edition serverless blocks DNS for non-allowlisted
+> hosts (`data.gharchive.org` → gaierror -3; pypi resolves fine) and the egress policy is
+> not user-configurable. Adaptation: downloader is developed/tested **locally** (stdlib-only,
+> `dest_dir` param makes it env-agnostic) and runs for real on the **Azure** cluster (full
+> egress); FE Auto Loader dev uses a few hourly files **uploaded manually** into
+> `workspace.bronze.landing` via the Catalog UI.
+
+- [ ] GH Archive downloader (parameterized date range, re-runnable, skips landed files) — dev locally, prod on Azure
+- [ ] Sample hours uploaded to FE landing volume (manual, one-time)
+- [ ] Auto Loader raw → bronze (schema evolution, `payload` forced STRING via schema hints, checkpointing, ingest metadata, partitioned)
 - [ ] Idempotency verified (re-run = zero new rows)
 
 ## Phase 3 — Bronze → Silver

@@ -76,3 +76,32 @@ report), and is then left dormant. Target Azure spend: **≤ $50** of the $100 c
 
 **Consequence:** every phase deliverable is still produced. "Built once, documented,
 cost-controlled" is exactly the FinOps maturity the plan wants to signal.
+
+---
+
+## ADR-003: The workspace is paused (destroyed) between work sessions
+
+**Date:** 2026-07-03
+**Trigger:** every Azure Databricks workspace silently creates a **NAT gateway + public IP**
+in its managed resource group — billing **~$32–36/month even with zero clusters running**.
+They cannot be deleted individually (the managed RG is deny-locked by Databricks).
+Verified live: `az resource list -g rg-ghintel-managed` showed `nat-gateway` + `nat-gw-public-ip`.
+
+**Decision:** because the entire footprint is Terraform, the workspace is **destroyed when
+idle** and recreated on demand:
+
+- Pause: `terraform destroy "-target=azurerm_databricks_workspace.this" -auto-approve`
+  (quote the -target flag in PowerShell — it splits on the dot otherwise)
+- Resume: `terraform apply`, then ~10 min of re-wiring:
+  1. new workspace URL from `terraform output workspace_url`
+  2. recreate secret scope `gh-intel` (`<url>#secrets/createScope`, KV URI + resource ID from outputs)
+  3. recreate the single-node cluster (`Standard_E4as_v4`, 10-min auto-terminate, no Photon/ML)
+  4. catalog `ghintel`, storage credential, external locations **survive automatically**
+     (they live in the account-level metastore, not the workspace) — just verify in Catalog
+
+**What is never lost:** the lake (ADLS + data), Key Vault + secrets, access connector,
+Unity Catalog objects, all code (git). **What dies with the workspace:** secret scope,
+cluster configs, non-git workspace notebooks (we keep none).
+
+**The talking point:** "My dev workspace idles at $0/month because recreating it is one
+command — infrastructure that isn't running shouldn't exist."
