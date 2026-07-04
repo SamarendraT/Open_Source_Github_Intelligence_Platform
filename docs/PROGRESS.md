@@ -6,9 +6,9 @@ Phase-by-phase log. Full plan: `DE_Project_Plan_GitHub_Ecosystem_Intelligence.md
 - [x] Problem statement + business questions in README
 - [x] Repo skeleton (`infra/ bundle/ src/ notebooks/ tests/ docs/ .github/workflows/`)
 - [x] `.gitignore` + secrets policy decided (Key Vault + secret scopes; `.env` local only, never committed)
-- [ ] `git init` + first commit
+- [x] `git init` + first commit
 - [x] GitHub repo created + pushed
-- [ ] Databricks Free Edition account created  ← **primary build/demo env** (see ADR-001)
+- [x] Databricks Free Edition account created  ← **primary build/demo env** (see ADR-001)
 - [x] Azure Cost Management budget = **$50** (annual) with alerts at 50/75/90% (alert-only; credit is the real hard stop)
 
 > **Student-account constraints verified 2026-07-03 — see `docs/DECISIONS.md` ADR-001 & ADR-002.**
@@ -39,10 +39,10 @@ Phase-by-phase log. Full plan: `DE_Project_Plan_GitHub_Ecosystem_Intelligence.md
 > egress); FE Auto Loader dev uses a few hourly files **uploaded manually** into
 > `workspace.bronze.landing` via the Catalog UI.
 
-- [ ] GH Archive downloader (parameterized date range, re-runnable, skips landed files) — dev locally, prod on Azure
-- [ ] Sample hours uploaded to FE landing volume (manual, one-time)
-- [ ] Auto Loader raw → bronze (schema evolution, `payload` forced STRING via schema hints, checkpointing, ingest metadata, partitioned)
-- [ ] Idempotency verified (re-run = zero new rows)
+- [x] GH Archive downloader (parameterized date range, re-runnable, skips landed files) — dev locally, prod on Azure
+- [x] Sample hours uploaded to FE landing volume (manual, one-time)
+- [x] Auto Loader raw → bronze (schema evolution, `payload` forced STRING via schema hints, checkpointing, ingest metadata, partitioned)
+- [x] Idempotency verified (re-run = zero new rows)
 
 ## Phase 3 — Bronze → Silver
 - [ ] JSON flattening (event_id, type, actor, repo, org, created_at; explode payloads)
