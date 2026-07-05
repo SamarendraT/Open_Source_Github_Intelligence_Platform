@@ -3,12 +3,18 @@ from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
 def build_dim_date(spark: SparkSession, start_date: str, end_date:str) -> DataFrame:
-    return (
-        spark.sql(
-            f"SELECT explode(sequence(to_date('{start_date}'),"
-            f"to_date('{end_date}', interval 1 day)) AS date"
-        )
-        .select(
+    
+    dates = spark.range(1).select(
+        F.explode(
+            F.sequence(
+                F.to_date(F.lit(start_date)),
+                F.to_date(F.lit(end_date)),
+                F.expr("interval 1 day"),
+            )
+        ).alias("date")
+    )
+    
+    return dates.select(
             F.date_format("date", "yyyyMMdd").cast("int").alias("date_key"),
             F.col("date"),
             F.year("date").alias("year"),
@@ -19,7 +25,6 @@ def build_dim_date(spark: SparkSession, start_date: str, end_date:str) -> DataFr
             F.date_format("date", "EEEE").alias("day_name"),
             F.dayofweek("date").isin(1, 7).alias("is_weekend"),
         )
-    )
 
 def latest_actor_state(events: DataFrame) -> DataFrame:
     w = Window.partitionBy("actor_id").orderBy(F.col("created_at").desc())
