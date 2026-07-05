@@ -1,4 +1,4 @@
-from src.tranforms.silver import dedupe_batch, flatten_events, split_quality
+from src.transforms.silver import dedupe_batch, flatten_events, split_quality
 
 def make_upsert(catalog: str):
 

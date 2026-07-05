@@ -1,13 +1,21 @@
 from pyspark.sql import functions as F 
 from pyspark.sql.window import Window 
 from pyspark.sql import DataFrame
-
+from pyspark.sql.types import StructType
 
 GHARCHIVE_EPOCH = "2011-02-12"
 
 def _nested(df: DataFrame, path:str, cast:str | None = None):
-    top = path.split(".")[0]
-    col = F.col(path) if top in df.columns else F.lit(None)
+    parts = path.split(".", 1)
+    top = parts[0]
+    if top not in df.columns:
+        col = F.lit(None)
+    elif len(parts) == 1:
+        col = F.col(top)
+    elif isinstance(df.schema[top].dataType, StructType):
+        col = F.col(path)
+    else:
+        col = F.get_json_object(F.col(top).cast("string"), "$." + [parts[1]])
     return col.cast(cast) if cast else col
 
 
@@ -21,8 +29,12 @@ def flatten_events(df: DataFrame) -> DataFrame:
         created.alias("created_at"),
         F.to_date(created).alias("event_date"),
         F.hour(created).alias("event_hour"),
+        _nested(df, "actor,id", "bigint").alias("actor_id"),
         actor_login.alias("actor_login"),
-        F.coalesce(actor_login.endswith("[bot]"), F.lit(False)).alias("is_bot"),
+        (
+            F.coalesce(actor_login.endswith("[bot]"), F.lit(False)) 
+            | F.coalesce(F.lower(actor_login).endswith("-bot"), F.lit(False))
+        ).alias("is_bot"),
         _nested(df, "repo.id", "bigint").alias("repo_id"),
         _nested(df, "repo.name", "string").alias("repo_name"),
         _nested(df, "org.id", "bigint").alias("org_id"),
