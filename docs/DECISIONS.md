@@ -105,3 +105,33 @@ cluster configs, non-git workspace notebooks (we keep none).
 
 **The talking point:** "My dev workspace idles at $0/month because recreating it is one
 command — infrastructure that isn't running shouldn't exist."
+
+---
+
+## ADR-004: foreachBatch materializes to a staging table before fanning out (silver layer)
+
+**Date:** 2026-07-03
+**Trigger:** the silver quarantine table was silently empty while silver itself was fully
+populated — a clean rebuild reproduced it, proving a live bug, not stale state. Root cause:
+`upsert_events` consumed the streaming micro-batch **twice** (MERGE first, quarantine append
+second). Serverless foreachBatch (`OPTIMIZED_FOREACHBATCH_FASTPATH` in the plan) treats the
+micro-batch source as effectively one-shot: the second action silently evaluated to empty.
+
+**Decision:** the writer materializes the tagged batch ONCE to a per-batch staging table
+(`silver._batch_staging`, mode=overwrite), and both sinks (MERGE into `silver.events`,
+append to `silver.events_quarantine`) read from staging. `split_quality` became
+`tag_quality` (returns one DataFrame with `dq_reason`; the split happens after
+materialization). Classic-compute alternative (`persist()`) is unsupported on serverless.
+
+**Also proven during this phase:**
+- Insert-only MERGE + checkpoint absorbed a real mid-batch crash (NameError after the MERGE,
+  before the append): the replay merged 0 rows and completed the append. Recovery = re-run.
+- Delta schema enforcement caught a column mismatch on the quarantine table; we fixed the
+  mismatch rather than paper over it with `mergeSchema=true` (which would have silently
+  created a second, misspelled column).
+- Real-data DQ base rate: 4 of 618,604 events (0.0006%) quarantined as `null_repo_id`.
+
+**Interview version:** "My quarantine was silently empty. A deterministic rebuild proved it
+was a real bug; the query plan's fastpath marker revealed double consumption of the
+micro-batch; the fix is materialize-once, fan-out-after — persist() on classic compute,
+a staging Delta table on serverless."

@@ -44,12 +44,13 @@ Phase-by-phase log. Full plan: `DE_Project_Plan_GitHub_Ecosystem_Intelligence.md
 - [x] Auto Loader raw → bronze (schema evolution, `payload` forced STRING via schema hints, checkpointing, ingest metadata, partitioned)
 - [x] Idempotency verified (re-run = zero new rows)
 
-## Phase 3 — Bronze → Silver
-- [ ] JSON flattening (event_id, type, actor, repo, org, created_at; explode payloads)
-- [ ] Dedup via Delta MERGE on event_id
-- [ ] Type casting + derived event_date/event_hour
-- [ ] DQ expectations + quarantine table
-- [ ] Transformations as pure functions in /src
+## Phase 3 — Bronze → Silver ✔ (completed 2026-07-03)
+- [x] JSON flattening — schema-aware `_nested` handles struct OR json-string bronze (`src/transforms/silver.py`)
+- [x] Dedup via insert-only Delta MERGE on event_id (batch-internal row_number dedup first)
+- [x] Type casting + derived event_date/event_hour; is_bot = `[bot]` OR `-bot` heuristic
+- [x] DQ tagging + quarantine table — **618,600 valid + 4 quarantined (null_repo_id) = 618,604 distinct bronze ids**; bad-data drill verified (`null_event_id`, `bad_timestamp` caught end-to-end)
+- [x] Pure functions in /src (`tag_quality` returns ONE df — see ADR-004: serverless foreachBatch is one-shot; writer materializes to `silver._batch_staging` then fans out to MERGE + quarantine)
+- Note for Phase 4: 2026 events carry no `payload.size` → `push_size` is NULL for current data; the daily mart counts *pushes*, not commits.
 
 ## Phase 4 — Silver → Gold
 - [ ] dim_repo (SCD Type 2), dim_actor, dim_date, dim_event_type
