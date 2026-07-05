@@ -25,6 +25,9 @@ override.tf.json
 # ── Databricks ──────────────────────────────────────────────────
 .databricks/
 
+# ── Local-only reference material ───────────────────────────────
+PROJECT_DEEP_DIVE*.pdf
+
 # ── Data & checkpoints — never commit data, only code ──────────
 data/
 checkpoints/
