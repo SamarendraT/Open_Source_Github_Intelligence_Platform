@@ -46,8 +46,7 @@ def flatten_events(df: DataFrame) -> DataFrame:
         F.col("_ingest_ts"),
 )
 
-def split_quality(df: DataFrame):
-    input_cols = df.columns
+def tag_quality(df: DataFrame) -> DataFrame:
     tomorrow = F.expr("current_timestamp() + INTERVAL 1 DAY")
     reason = (
         F.when(F.col("event_id").isNull(), "null_event_id")
@@ -56,15 +55,7 @@ def split_quality(df: DataFrame):
         .when(F.col("created_at") > tomorrow, "bad_timestamp")
         .when(F.col("repo_id").isNull(), "null_repo_id")
     )
-    tagged = df.withColumn("dq_reason", reason)
-    valid = tagged.filter(F.col("dq_reason").isNull()).drop("dq_reason")
-    quarantine = tagged.filter(F.col("dq_reason").isNotNull()).select(
-        F.to_json(F.struct(*[F.col(c) for c in input_cols])).alias("raw"),
-        F.col("dq_reason"),
-        F.col("_ingest_file"),
-        F.current_timestamp().alias("_quarantined_ts"),
-    )
-    return valid, quarantine
+    return df.withColumn("dq_reason", reason)
     
 def dedupe_batch(df: DataFrame) -> DataFrame:
     w = Window.partitionBy("event_id").orderBy(
