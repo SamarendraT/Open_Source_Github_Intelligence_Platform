@@ -15,7 +15,7 @@ def _nested(df: DataFrame, path:str, cast:str | None = None):
     elif isinstance(df.schema[top].dataType, StructType):
         col = F.col(path)
     else:
-        col = F.get_json_object(F.col(top).cast("string"), "$." + [parts[1]])
+        col = F.get_json_object(F.col(top).cast("string"), "$." + parts[1])
     return col.cast(cast) if cast else col
 
 
@@ -29,7 +29,7 @@ def flatten_events(df: DataFrame) -> DataFrame:
         created.alias("created_at"),
         F.to_date(created).alias("event_date"),
         F.hour(created).alias("event_hour"),
-        _nested(df, "actor,id", "bigint").alias("actor_id"),
+        _nested(df, "actor.id", "bigint").alias("actor_id"),
         actor_login.alias("actor_login"),
         (
             F.coalesce(actor_login.endswith("[bot]"), F.lit(False)) 
