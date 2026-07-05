@@ -16,7 +16,7 @@ def flatten_events(df: DataFrame) -> DataFrame:
     payload = _nested(df, "payload", "string")
     actor_login = _nested(df, "actor.login", "string")
     return df.select(
-        _nested(dff, "id", "string").alias("event_id"),
+        _nested(df, "id", "string").alias("event_id"),
         _nested(df, "type", "string").alias("event_type"),
         created.alias("created_at"),
         F.to_date(created).alais("event_date"),
