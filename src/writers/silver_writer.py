@@ -14,7 +14,7 @@ def make_upsert(catalog: str):
             f"""
             MERGE INTO {catalog}.silver.events AS t
             USING silver_batch AS s
-            ON t.events_id = s.events_id
+            ON t.event_id = s.event_id
             WHEN NOT MATCHED THEN INSERT *
             """
         )

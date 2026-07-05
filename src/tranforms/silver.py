@@ -19,17 +19,16 @@ def flatten_events(df: DataFrame) -> DataFrame:
         _nested(df, "id", "string").alias("event_id"),
         _nested(df, "type", "string").alias("event_type"),
         created.alias("created_at"),
-        F.to_date(created).alais("event_date"),
-        F.hour(created).alais("event_hour"),
-        _nested(created).alias("actor_login"),
-        actor_login.alais("actor_login"),
-        F.coalesce(actor_login.endswith("[bot]"), F.lit(False)).alais("is_bot"),
-        _nested(df, "repo.id", "bigint").alais("repo_id"),
+        F.to_date(created).alias("event_date"),
+        F.hour(created).alias("event_hour"),
+        actor_login.alias("actor_login"),
+        F.coalesce(actor_login.endswith("[bot]"), F.lit(False)).alias("is_bot"),
+        _nested(df, "repo.id", "bigint").alias("repo_id"),
         _nested(df, "repo.name", "string").alias("repo_name"),
         _nested(df, "org.id", "bigint").alias("org_id"),
         _nested(df, "org.login", "string").alias("org_login"),
         F.get_json_object(payload, "$.action").alias("action"),
-        F.get_json_object(payload, "$.size").cast("int").alais("push_size"),
+        F.get_json_object(payload, "$.size").cast("int").alias("push_size"),
         payload.alias("payload"),
         F.col("_ingest_file"),
         F.col("_ingest_ts"),
@@ -41,14 +40,14 @@ def split_quality(df: DataFrame):
     reason = (
         F.when(F.col("event_id").isNull(), "null_event_id")
         .when(F.col("created_at").isNull(), "bad_timestamp")
-        .when(F.col("created_at") < F.lit(GHARVHIVE_EPOCH).cast("timestamp"), "bad_timestamp")
+        .when(F.col("created_at") < F.lit(GHARCHIVE_EPOCH).cast("timestamp"), "bad_timestamp")
         .when(F.col("created_at") > tomorrow, "bad_timestamp")
         .when(F.col("repo_id").isNull(), "null_repo_id")
     )
     tagged = df.withColumn("dq_reason", reason)
     valid = tagged.filter(F.col("dq_reason").isNull()).drop("dq_reason")
     quarantine = tagged.filter(F.col("dq_reason").isNotNull()).select(
-        F.to_json(F.struct(*[F.col(c) for c in input_cols])).alais("raw"),
+        F.to_json(F.struct(*[F.col(c) for c in input_cols])).alias("raw"),
         F.col("dq_reason"),
         F.col("_ingest_file"),
         F.current_timestamp().alias("_quarantined_ts"),
