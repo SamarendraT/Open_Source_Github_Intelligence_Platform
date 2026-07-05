@@ -1,5 +1,5 @@
 from pyspark.sql import functions as F 
-from pyspark.sqk.window import window 
+from pyspark.sql.window import window 
 from pyspark.sql import DataFrame
 
 
