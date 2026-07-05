@@ -30,7 +30,7 @@ def latest_actor_state(events: DataFrame) -> DataFrame:
     w = Window.partitionBy("actor_id").orderBy(F.col("created_at").desc())
     latest = (
         events.filter(F.col("actor_id").isNotNull())
-        .withcolumn("_rn", F.row_number().over(w))
+        .withColumn("_rn", F.row_number().over(w))
         .filter("_rn = 1")
         .select("actor_id", "actor_login", "is_bot")
     )
@@ -42,7 +42,7 @@ def latest_actor_state(events: DataFrame) -> DataFrame:
             F.max("event_date").alias("last_seen_date")
         )
     )
-    return latest.join(seen, actor_id)
+    return latest.join(seen, "actor_id")
 
     
 def event_type_dim(events: DataFrame) -> DataFrame:
