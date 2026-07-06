@@ -1,6 +1,6 @@
 def scd2_upsert_dim_repo(incoming, catalog: str) -> None:
     incoming.createOrReplaceTempView("repo_incoming")
-    incoming.SparkSession.sql(
+    incoming.sparkSession.sql(
         f"""
         MERGE INTO {catalog}.gold.dim_repo AS t
         USING (
