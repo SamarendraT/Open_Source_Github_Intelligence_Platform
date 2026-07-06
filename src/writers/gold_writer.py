@@ -1,4 +1,4 @@
-def scd2_upsert_dim_rpepo(incoming, catalog: str) -> None:
+def scd2_upsert_dim_repo(incoming, catalog: str) -> None:
     incoming.createOrReplaceTempView("repo_incoming")
     incoming.SparkSession.sql(
         f"""
