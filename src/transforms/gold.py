@@ -48,3 +48,30 @@ def latest_actor_state(events: DataFrame) -> DataFrame:
 def event_type_dim(events: DataFrame) -> DataFrame:
     return events.select("event_type").distinct().filter(F.col("event_type").isNotNull())
     
+
+def latest_repo_state(events: DataFrame) -> DataFrame:
+    base = events.filter(F.col("repo_id").isNotNull())
+    w = Window.partitionBy("repo_id").orderBy(F.col("created_at").desc())
+
+    latest = (
+        base.withColumn("_rn", F.row_number().over(w))
+        .filter("_rn = 1")
+        .select(
+            "repo_id",
+            "repo_name",
+            F.split("repo_name", "/").getItem(0).alias("owner"),
+            F.col("created_at").alias("observed_at"),
+        )
+    )
+    first = base.groupBy("repo_id").agg(F.min("created_at").alias("first_seen_ts"))
+    lang = (
+        base.filter(F.col("event_type") == "PullRequestEvent")
+        .withColumn("language", F.get_json_object("payload", "$.pull_request.base.repo.language"))
+        .filter(F.col("language").isNotNull())
+        .withColumn("_rn", F.row_number().over(w))
+        .filter("_rn = 1")
+        .select("repo_id", "language")
+    )
+
+    return latest.join(first, "repo_id").join(lang, "repo_id", "left")
+    
