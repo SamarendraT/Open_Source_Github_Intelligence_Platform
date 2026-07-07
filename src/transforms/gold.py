@@ -101,7 +101,8 @@ def daily_repo_metrics(events: DataFrame) -> DataFrame:
             F.coalesce(F.sum(F.when(F.col("event_type") == "PushEvent", F.col("push_size"))), F.lit(0)).alias("commits_pushed"),
             F.sum(F.when(is_pr & (F.col("action") == "opened"), 1).otherwise(0)).alias("prs_opened"),
             F.sum(F.when(is_pr & (merged == "true"), 1).otherwise(0)).alias("prs_merged"),
-            F.sum(F.when((F.col("event_type") == "IssueEvent") & (F.col("action") == "opened"), 1).otherwise(0)).alias("releases"),
+            F.sum(F.when((F.col("event_type") == "IssueEvent") & (F.col("action") == "opened"), 1).otherwise(0)).alias("issues_opened"),
+            F.sum(F.when(F.col("event_type") == "ReleaseEvent",1).otherwise(0)).alias("releases"),
             F.countDistinct("actor_id").alias("unique_actors"),
             F.countDistinct(F.when(~F.col("is_bot"), F.col("actor_id"))).alias("unique_human_actors"),
         )
