@@ -25,3 +25,14 @@ def scd2_upsert_dim_repo(incoming, catalog: str) -> None:
             NULL, true)
         """
     )
+
+
+def overwrite_date_range(df, table: str, start_date: str, end_date: str) -> None:
+    target_cols = [f.name for f in df.sparkSession.table(table).schema.fields]
+    (
+        df.select(*target_cols)
+        .write.format("delta")
+        .mode("overwrite")
+        .option("replaceWhere", f"event_date >= '{start_date}' AND event_date <= '{end_date}'")
+        .saveAsTable(table)
+    )

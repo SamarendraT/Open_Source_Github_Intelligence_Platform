@@ -126,3 +126,4 @@ def language_trends(events: DataFrame, dim_repo: DataFrame) -> DataFrame:
         .withColumn("share_of_events", F.col("events") / F.sum("events").over(day_total))
     )
     
+
