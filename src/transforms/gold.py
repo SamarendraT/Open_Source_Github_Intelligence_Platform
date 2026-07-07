@@ -121,7 +121,7 @@ def language_trends(events: DataFrame, dim_repo: DataFrame) -> DataFrame:
         F.countDistinct("repo_id").alias("active_repos"),
         F.count("*").alias("events"),
     )
-    day_total = Windoe.partitionBy("event_date")
+    day_total = Window.partitionBy("event_date")
     return (
         per_day.withColumn("date_key", F.date_format("event_date", "yyyyMMdd").cast("int"))
         .withColumn("share_of_events", F.col("events") / F.sum("events").over(day_total))
