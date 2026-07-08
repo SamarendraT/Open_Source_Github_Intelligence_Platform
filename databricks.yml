@@ -2,7 +2,7 @@ bundle:
   name: gh-ecosystem-intelligence
 
 include:
-  -bundle/resources/*.yml
+  - bundle/resources/*.yml
 
 targets:
   dev:

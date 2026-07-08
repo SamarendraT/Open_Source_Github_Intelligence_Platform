@@ -1,4 +1,4 @@
 pyspark==3.5.3
-chipsa==-.10.1
+chispa==0.10.1
 pytest==8.3.3
 ruff==0.6.9
