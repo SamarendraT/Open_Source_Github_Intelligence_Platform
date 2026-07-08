@@ -1,5 +1,6 @@
 from datetime import datetime
-from pyspark.sql import functions as F 
+
+from pyspark.sql import functions as F
 
 from src.transforms.silver import dedupe_batch, flatten_events, tag_quality
 

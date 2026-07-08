@@ -1,7 +1,7 @@
-from pyspark.sql import functions as F 
-from pyspark.sql.window import Window 
 from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
 from pyspark.sql.types import StructType
+from pyspark.sql.window import Window
 
 GHARCHIVE_EPOCH = "2011-02-12"
 
@@ -32,7 +32,7 @@ def flatten_events(df: DataFrame) -> DataFrame:
         _nested(df, "actor.id", "bigint").alias("actor_id"),
         actor_login.alias("actor_login"),
         (
-            F.coalesce(actor_login.endswith("[bot]"), F.lit(False)) 
+            F.coalesce(actor_login.endswith("[bot]"), F.lit(False))
             | F.coalesce(F.lower(actor_login).endswith("-bot"), F.lit(False))
         ).alias("is_bot"),
         _nested(df, "repo.id", "bigint").alias("repo_id"),
@@ -56,7 +56,7 @@ def tag_quality(df: DataFrame) -> DataFrame:
         .when(F.col("repo_id").isNull(), "null_repo_id")
     )
     return df.withColumn("dq_reason", reason)
-    
+
 def dedupe_batch(df: DataFrame) -> DataFrame:
     w = Window.partitionBy("event_id").orderBy(
         F.col("_ingest_ts").asc(), F.col("_ingest_file").asc()

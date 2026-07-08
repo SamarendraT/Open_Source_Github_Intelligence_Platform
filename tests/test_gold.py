@@ -1,4 +1,5 @@
 from datetime import date, datetime
+
 from src.transforms.gold import build_dim_date, daily_repo_metrics, latest_repo_state
 
 _EVENT_SCHEMA = (
@@ -51,4 +52,3 @@ def test_latest_repo_state_latest_name_and_language(spark):
     assert s.repo_name == "new-org/tool"
     assert s.owner == "new-org"
     assert s.language == "Rust"
-    

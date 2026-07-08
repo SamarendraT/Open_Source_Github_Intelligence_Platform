@@ -1,5 +1,8 @@
-from src.transforms.silver import dedupe_batch, flatten_events, tag_quality
 from pyspark.sql import functions as F
+
+from src.transforms.silver import dedupe_batch, flatten_events, tag_quality
+
+
 def make_upsert(catalog: str):
 
     def upsert_events(microbatch_df, batch_id: int) -> None:
@@ -35,4 +38,3 @@ def make_upsert(catalog: str):
             .saveAsTable(f"{catalog}.silver.events_quarantine")
         )
     return upsert_events
-    

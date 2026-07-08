@@ -1,9 +1,10 @@
 from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql import functions as F 
+from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
+
 def build_dim_date(spark: SparkSession, start_date: str, end_date:str) -> DataFrame:
-    
+
     dates = spark.range(1).select(
         F.explode(
             F.sequence(
@@ -13,7 +14,7 @@ def build_dim_date(spark: SparkSession, start_date: str, end_date:str) -> DataFr
             )
         ).alias("date")
     )
-    
+
     return dates.select(
             F.date_format("date", "yyyyMMdd").cast("int").alias("date_key"),
             F.col("date"),
@@ -44,10 +45,10 @@ def latest_actor_state(events: DataFrame) -> DataFrame:
     )
     return latest.join(seen, "actor_id")
 
-    
+
 def event_type_dim(events: DataFrame) -> DataFrame:
     return events.select("event_type").distinct().filter(F.col("event_type").isNotNull())
-    
+
 
 def latest_repo_state(events: DataFrame) -> DataFrame:
     base = events.filter(F.col("repo_id").isNotNull())
@@ -125,5 +126,5 @@ def language_trends(events: DataFrame, dim_repo: DataFrame) -> DataFrame:
         per_day.withColumn("date_key", F.date_format("event_date", "yyyyMMdd").cast("int"))
         .withColumn("share_of_events", F.col("events") / F.sum("events").over(day_total))
     )
-    
+
 

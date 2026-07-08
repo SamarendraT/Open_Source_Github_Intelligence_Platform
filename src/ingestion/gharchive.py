@@ -1,6 +1,6 @@
-import urllib.request
 import os
 import shutil
+import urllib.request
 
 USER_AGENT = "gh-ecosystem-intelligence/0.1 (DE Portfolio)"
 
@@ -35,7 +35,7 @@ def download_range(start_date, end_date, dest_dir):
     start = datetime.strptime(start_date, "%Y-%m-%d")
     end = datetime.strptime(end_date, "%Y-%m-%d")
     summary = {"downloaded": 0, "skipped": 0, "failed": 0}
-    
+
     date = start
     while date <= end:
         date_str = date.strftime("%Y-%m-%d")
@@ -44,7 +44,7 @@ def download_range(start_date, end_date, dest_dir):
             status = download_hour(date_str, hour, dest_dir)
             summary[status] += 1
             print(f"[{date_str} {hour:02d}] {status}")
-            
+
         date += timedelta(days=1)
 
 
