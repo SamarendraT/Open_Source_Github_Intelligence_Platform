@@ -1,0 +1,11 @@
+bundle:
+  name: gh-ecosystem-intelligence
+
+include:
+  -bundle/resources/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    
