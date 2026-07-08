@@ -88,7 +88,6 @@ def build_fact_events(events: DataFrame) -> DataFrame:
     )
 
 def daily_repo_metrics(events: DataFrame) -> DataFrame:
-    merged = F.get_json_object("payload", "$.pull_request.merged")
     is_pr = F.col("event_type") == "PullRequestEvent"
     return (
         events.filter(F.col("repo_id").isNotNull())
