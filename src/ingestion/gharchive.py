@@ -47,6 +47,22 @@ def download_range(start_date, end_date, dest_dir):
 
         date += timedelta(days=1)
 
+    return summary
 
 
+def download_hour_range(start: str, end: str, dest_dir: str) -> dict:
+    from datetime import datetime, timedelta
+
+    def _parse(s: str) -> datetime:
+        d, h = s.rsplit("-", 1)
+        return datetime.strptime(d, "%Y-%m-%d").replace(hour=int(h))
+
+    current, last = _parse(start), _parse(end)
+    summary = {"downloaded": 0, "skipped": 0, "failed": 0}
+    while current <= last:
+        date_str = current.strftime("%Y-%m-%d")
+        status = download_hour(date_str, current.hour, dest_dir)
+        summary[status] += 1
+        print(f"[{date_str}-{current.hour}] {status}")
+        current += timedelta(hours=1)
     return summary
