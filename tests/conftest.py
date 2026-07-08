@@ -5,7 +5,7 @@ from pyspark.sql import SparkSession
 def spark():
     session = (
         SparkSession.builder.master("local[1]")
-        .appname("gh-intel-tests")
+        .appName("gh-intel-tests")
         .config("spark.sql.shuffle.partitions","1")
         .config("spark.sql.session.timeZone", "UTC")
         .config("spark.ui.enabled", "false")
